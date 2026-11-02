@@ -1,0 +1,35 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
+}
+
+.filters select {
+  flex: 1 1 200px;
+  max-width: 280px;
+}
+
+.button {
+  padding: 0.6rem 1.3rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.email {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}

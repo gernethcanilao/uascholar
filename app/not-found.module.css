@@ -1,0 +1,15 @@
+.wrapper {
+  max-width: 520px;
+  margin: 4rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.link {
+  display: inline-block;
+  margin-top: 1rem;
+  font-weight: 600;
+}

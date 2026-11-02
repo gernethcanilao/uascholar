@@ -1,0 +1,36 @@
+import { requireStudent } from '@/lib/auth';
+import { createClient } from '@/lib/supabase/server';
+import { decryptStudentProfile } from '@/lib/profile';
+import PageHeader from '@/components/PageHeader/PageHeader';
+import ProfileForm from '@/components/ProfileForm/ProfileForm';
+import styles from './page.module.css';
+
+export const metadata = { title: 'My Profile | UA Scholar' };
+
+export default async function StudentProfilePage() {
+  const { profile } = await requireStudent();
+  const supabase = await createClient();
+
+  const { data: row } = await supabase
+    .from('profiles')
+    .select('id, full_name, email, personal_data_encrypted, academic_data_encrypted')
+    .eq('id', profile.id)
+    .single();
+
+  const { personal, academic } = decryptStudentProfile(row);
+
+  return (
+    <>
+      <PageHeader title="My Profile" description="Keep your personal and academic information up to date." />
+      <div className={styles.card}>
+        <p className={styles.secure}>🔒 Your personal and academic information is encrypted (AES-256) before it is stored.</p>
+        <ProfileForm
+          email={row.email}
+          fullName={row.full_name}
+          personal={personal}
+          academic={academic}
+        />
+      </div>
+    </>
+  );
+}

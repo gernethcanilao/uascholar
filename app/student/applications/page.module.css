@@ -1,0 +1,10 @@
+.tableWrapper {
+  overflow-x: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.name {
+  font-weight: 600;
+}

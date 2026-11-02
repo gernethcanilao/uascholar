@@ -1,0 +1,69 @@
+.timeline {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+}
+
+.step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 22px;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.step p {
+  margin: 0.1rem 0 0;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+}
+
+.dot {
+  flex: 0 0 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  background: #fff;
+}
+
+.done .dot {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.current .dot {
+  border-color: var(--color-accent);
+  background: var(--color-warning-bg);
+}
+
+.approved .dot {
+  border-color: var(--color-success);
+  background: var(--color-success);
+}
+
+.approved strong {
+  color: var(--color-success);
+}
+
+.rejected .dot {
+  border-color: var(--color-danger);
+  background: var(--color-danger);
+}
+
+.rejected strong {
+  color: var(--color-danger);
+}
+
+.upcoming strong {
+  color: var(--color-muted);
+}

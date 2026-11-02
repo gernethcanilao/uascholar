@@ -1,0 +1,17 @@
+.error,
+.success {
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  margin: 0 0 1rem;
+}
+
+.error {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}

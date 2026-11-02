@@ -1,0 +1,177 @@
+// =====================================================================
+// UA Scholar - database schema (Prisma)
+//
+// Prisma owns the TABLES, ENUMS, RELATIONS and INDEXES defined here.
+// Things Prisma cannot express live in hand-written SQL migrations
+// (prisma/migrations/*_security): Row Level Security policies, helper
+// functions, triggers, column grants, CHECK constraints and Storage.
+//
+// The app does NOT use Prisma Client at runtime. All queries go through
+// Supabase (lib/supabase/*) as the logged-in user, so RLS is enforced.
+//
+// Columns ending in "_encrypted" hold AES-256-GCM ciphertext produced by
+// app/_lib/aes-encryption.js on the server. The database never sees the keys.
+// =====================================================================
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  student
+  admin
+  super_admin
+
+  @@map("user_role")
+}
+
+enum ApplicationStatus {
+  pending
+  approved
+  rejected
+
+  @@map("application_status")
+}
+
+enum ScholarshipCategory {
+  Academic
+  Grant
+  Talent
+  Athletic
+
+  @@map("scholarship_category")
+}
+
+/// One row per Supabase Auth user (created by the on_auth_user_created trigger).
+/// id = auth.users.id
+model Profile {
+  id                    String   @id @db.Uuid
+  email                 String
+  fullName              String   @default("") @map("full_name")
+  role                  UserRole @default(student)
+  isActive              Boolean  @default(true) @map("is_active")
+  /// Student: student no., phone, birthdate, address (student key)
+  personalDataEncrypted String?  @map("personal_data_encrypted")
+  /// Student: course, year level, GWA (student key)
+  academicDataEncrypted String?  @map("academic_data_encrypted")
+  /// Admin: position, office, phone (admin key)
+  adminDataEncrypted    String?  @map("admin_data_encrypted")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  applications         Application[]     @relation("StudentApplications")
+  reviewedApplications Application[]     @relation("ReviewedApplications")
+  documents            Document[]
+  notifications        Notification[]
+  announcements        Announcement[]
+  assignments          AdminAssignment[]
+
+  @@map("profiles")
+}
+
+model Scholarship {
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug               String              @unique
+  name               String
+  category           ScholarshipCategory
+  summary            String              @default("")
+  benefits           String[]            @default([])
+  eligibility        String[]            @default([])
+  applicationProcess String[]            @default([]) @map("application_process")
+  requiredDocuments  String[]            @default([]) @map("required_documents")
+  deadline           DateTime?           @db.Date
+  isActive           Boolean             @default(true) @map("is_active")
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  applications Application[]
+  assignments  AdminAssignment[]
+
+  @@map("scholarships")
+}
+
+/// Which scholarships a scholarship admin is allowed to manage.
+model AdminAssignment {
+  adminId       String   @map("admin_id") @db.Uuid
+  scholarshipId String   @map("scholarship_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  admin       Profile     @relation(fields: [adminId], references: [id], onDelete: Cascade, map: "admin_assignments_admin_id_fkey")
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Cascade, map: "admin_assignments_scholarship_id_fkey")
+
+  @@id([adminId, scholarshipId])
+  @@map("admin_assignments")
+}
+
+model Application {
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  studentId            String            @map("student_id") @db.Uuid
+  scholarshipId        String            @map("scholarship_id") @db.Uuid
+  status               ApplicationStatus @default(pending)
+  /// Student answers (student key)
+  formDataEncrypted    String            @map("form_data_encrypted")
+  /// Admin review notes (admin key)
+  reviewNotesEncrypted String?           @map("review_notes_encrypted")
+  reviewedById         String?           @map("reviewed_by") @db.Uuid
+  reviewedAt           DateTime?         @map("reviewed_at") @db.Timestamptz(6)
+  submittedAt          DateTime          @default(now()) @map("submitted_at") @db.Timestamptz(6)
+
+  // FK names are fixed because the app uses them as Supabase join hints,
+  // e.g. profiles!applications_student_id_fkey(...)
+  student     Profile     @relation("StudentApplications", fields: [studentId], references: [id], onDelete: Cascade, map: "applications_student_id_fkey")
+  reviewer    Profile?    @relation("ReviewedApplications", fields: [reviewedById], references: [id], onDelete: SetNull, map: "applications_reviewed_by_fkey")
+  // Restrict: a scholarship with applications cannot be deleted (it is deactivated instead).
+  scholarship Scholarship @relation(fields: [scholarshipId], references: [id], onDelete: Restrict, map: "applications_scholarship_id_fkey")
+  documents   Document[]
+
+  @@unique([studentId, scholarshipId])
+  @@index([studentId])
+  @@index([scholarshipId])
+  @@map("applications")
+}
+
+/// Metadata of an uploaded file. The file itself is AES-encrypted in the private "documents" bucket.
+model Document {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  applicationId     String   @map("application_id") @db.Uuid
+  studentId         String   @map("student_id") @db.Uuid
+  documentType      String   @map("document_type")
+  fileNameEncrypted String   @map("file_name_encrypted")
+  storagePath       String   @unique @map("storage_path")
+  mimeType          String   @map("mime_type")
+  sizeBytes         Int      @map("size_bytes")
+  uploadedAt        DateTime @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade, map: "documents_application_id_fkey")
+  student     Profile     @relation(fields: [studentId], references: [id], onDelete: Cascade, map: "documents_student_id_fkey")
+
+  @@index([applicationId])
+  @@map("documents")
+}
+
+model Notification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade, map: "notifications_user_id_fkey")
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("notifications")
+}
+
+model Announcement {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  body      String
+  createdBy String?  @map("created_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  author Profile? @relation(fields: [createdBy], references: [id], onDelete: SetNull, map: "announcements_created_by_fkey")
+
+  @@map("announcements")
+}

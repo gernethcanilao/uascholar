@@ -1,0 +1,18 @@
+.button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-danger);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}

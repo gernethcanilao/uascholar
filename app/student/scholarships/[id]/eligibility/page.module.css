@@ -1,0 +1,11 @@
+.card {
+  padding: 1.75rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.intro {
+  margin: 0 0 1.25rem;
+  color: var(--color-muted);
+}

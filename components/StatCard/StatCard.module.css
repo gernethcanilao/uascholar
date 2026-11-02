@@ -1,0 +1,36 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-left: 5px solid var(--color-primary);
+}
+
+.label {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.value {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.default {
+  border-left-color: var(--color-primary);
+}
+
+.pending {
+  border-left-color: var(--color-accent);
+}
+
+.approved {
+  border-left-color: var(--color-success);
+}
+
+.rejected {
+  border-left-color: var(--color-danger);
+}
