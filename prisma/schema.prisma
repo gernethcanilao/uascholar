@@ -164,6 +164,15 @@ model Notification {
   @@map("notifications")
 }
 
+/// Student emails allowed to set up an account (first-time setup with an emailed code).
+/// Managed with SQL by a super admin; never readable through the app's API.
+model AuthorizedEmail {
+  email     String   @id
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("authorized_emails")
+}
+
 model Announcement {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String

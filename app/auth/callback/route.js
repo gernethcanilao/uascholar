@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { isUaEmail, safeRedirectPath } from '@/lib/validation';
 import { ROLES } from '@/lib/constants';
 
-/** Handles the redirect back from Google sign-in and email confirmation links. */
+/** Handles the redirect back from Supabase email links (for example, a sign-in link in the code email). */
 export async function GET(request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');

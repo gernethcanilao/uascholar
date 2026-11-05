@@ -25,11 +25,23 @@ Then set `AES_SECRET_KEY` in `.env.local` to a random string of at least 32 char
 4. **Authentication > URL Configuration**: set *Site URL* to `http://localhost:3000` and add
    `http://localhost:3000/auth/callback` to *Redirect URLs* (add your production URL too).
 
-### 3. Google sign-in
-1. In Google Cloud Console, create an **OAuth Client ID** (Web application).
-2. Add the authorized redirect URI shown in **Supabase > Authentication > Providers > Google**
-   (it looks like `https://<project>.supabase.co/auth/v1/callback`).
-3. Paste the Google Client ID and Secret into the Supabase Google provider and enable it.
+### 3. Email verification codes (first-time account setup)
+Students set up their account by entering a code sent to their UA email. Supabase Auth sends,
+expires and rate-limits these codes; this app does not store any email-service keys.
+
+1. **Email delivery (required):** Supabase's built-in email only reaches your project's team members
+   and is limited to a few emails per hour. Set up a real provider under
+   **Authentication > Emails > SMTP Settings** (e.g. Resend, Brevo, SendGrid, or Google Workspace SMTP)
+   with its host, port, username, password and sender address.
+2. **Send a code, not only a link:** in **Authentication > Emails > Templates**, add `{{ .Token }}` to
+   both the **Confirm signup** and **Magic Link** templates, for example:
+   `Your UA Scholar verification code is {{ .Token }}. It expires in 10 minutes.`
+3. **Authentication > Providers > Email:** keep **Enable Email provider**, **Allow new users to sign up**
+   and **Confirm email** ON. Sign-ups are still restricted: the database only creates accounts
+   for emails on the authorized list. Set **Email OTP Expiration** to `600` seconds (10 minutes).
+4. **Authentication > Rate Limits:** review the limits for emails sent and for token verifications
+   (these limit repeated code requests and wrong-code attempts).
+5. **Google provider:** keep it disabled (Continue with Google was removed).
 
 ### 4. Run
 ```bash
@@ -37,14 +49,39 @@ npm run dev
 ```
 
 ### 5. Create the first super admin
-There is no public registration page. Sign in once with your UA Google account (`@ua.edu.ph`),
-then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
+There is no public registration page. Authorize your email (see below), set up your account on the
+login page, then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
 ```sql
 update public.profiles set role = 'super_admin' where email = 'you@ua.edu.ph';
 ```
-Only `@ua.edu.ph` emails can create accounts (enforced by the `*_ua_students_only` migration).
-Also turn off **Authentication > Providers > Email > Allow new users to sign up** in Supabase.
 From then on, the super admin promotes other users and assigns scholarships under **Admin > Account Management**.
+
+## Authorized student emails
+
+Only emails in the private `public.authorized_emails` table can set up an account
+(created by the `*_authorized_emails` migration, which also adds the first three students).
+The table is not reachable through the website or the Supabase API; manage it in the **SQL Editor**:
+
+```sql
+-- authorize a student (lowercase @ua.edu.ph only; duplicates are rejected)
+insert into public.authorized_emails (email) values ('name.student@ua.edu.ph');
+
+-- see the list
+select * from public.authorized_emails order by created_at;
+
+-- remove an authorization (does not delete an account that was already set up;
+-- to block an existing account, deactivate it in Admin > Account Management)
+delete from public.authorized_emails where email = 'name.student@ua.edu.ph';
+```
+
+**Login flow:** enter UA email →
+- account already set up → enter password → dashboard;
+- authorized, no account yet → a code is emailed → enter code → create password → dashboard
+  (one time only; later logins use the password);
+- not authorized → "not currently authorized" message, no account is created.
+
+The list only proves that someone was authorized and can open that UA mailbox. It does not
+check current enrollment.
 
 ## Database (Prisma)
 
