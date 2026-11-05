@@ -4,6 +4,27 @@
   gap: 1rem;
 }
 
+/* Email input with a faded "@ua.edu.ph" suffix drawn behind the typed text. */
+.emailField {
+  position: relative;
+}
+
+.domainHint {
+  position: absolute;
+  inset: 0;
+  padding: calc(0.6rem + 1px) calc(0.75rem + 1px);
+  overflow: hidden;
+  white-space: pre;
+  color: var(--color-muted);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Invisible copy of the typed text so the suffix starts right after it. */
+.typed {
+  visibility: hidden;
+}
+
 .form button[type='submit'] {
   width: 100%;
   margin-top: 0.25rem;

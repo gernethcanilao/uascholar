@@ -37,10 +37,13 @@ npm run dev
 ```
 
 ### 5. Create the first super admin
-Register normally, then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
+There is no public registration page. Sign in once with your UA Google account (`@ua.edu.ph`),
+then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
 ```sql
-update public.profiles set role = 'super_admin' where email = 'you@example.com';
+update public.profiles set role = 'super_admin' where email = 'you@ua.edu.ph';
 ```
+Only `@ua.edu.ph` emails can create accounts (enforced by the `*_ua_students_only` migration).
+Also turn off **Authentication > Providers > Email > Allow new users to sign up** in Supabase.
 From then on, the super admin promotes other users and assigns scholarships under **Admin > Account Management**.
 
 ## Database (Prisma)

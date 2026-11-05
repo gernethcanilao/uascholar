@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { safeRedirectPath } from '@/lib/validation';
+import { isUaEmail, safeRedirectPath } from '@/lib/validation';
+import { ROLES } from '@/lib/constants';
 
 /** Handles the redirect back from Google sign-in and email confirmation links. */
 export async function GET(request) {
@@ -10,8 +11,14 @@ export async function GET(request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      // Only UA students may use the portal (admin accounts are authorized by their role).
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).maybeSingle();
+      if (!profile || (profile.role === ROLES.STUDENT && !isUaEmail(data.user.email))) {
+        await supabase.auth.signOut();
+        return NextResponse.redirect(`${origin}/login?error=domain`);
+      }
       return NextResponse.redirect(`${origin}${next}`);
     }
     console.error('OAuth code exchange failed:', error.message);

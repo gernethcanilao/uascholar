@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { getCurrentUser } from '@/lib/auth';
+import { requireUser } from '@/lib/auth';
 import { formatDate } from '@/lib/format';
 import { ROLES } from '@/lib/constants';
 import LinkButton from '@/components/LinkButton/LinkButton';
@@ -20,6 +20,9 @@ function DetailList({ title, items, ordered = false }) {
 }
 
 export default async function ScholarshipDetailsPage({ params }) {
+  // Scholarship details are only for logged-in users.
+  const current = await requireUser();
+
   const { slug } = await params;
   const supabase = await createClient();
 
@@ -32,13 +35,10 @@ export default async function ScholarshipDetailsPage({ params }) {
 
   if (!scholarship) notFound();
 
-  const current = await getCurrentUser();
   const eligibilityPath = `/student/scholarships/${scholarship.id}/eligibility`;
 
   let callToAction = null;
-  if (!current) {
-    callToAction = <LinkButton href={`/login?next=${encodeURIComponent(eligibilityPath)}`}>Log in to apply</LinkButton>;
-  } else if (current.profile.role === ROLES.STUDENT) {
+  if (current.profile.role === ROLES.STUDENT) {
     callToAction = <LinkButton href={eligibilityPath}>Check eligibility &amp; apply</LinkButton>;
   }
 

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { UA_EMAIL_DOMAIN } from '@/lib/constants';
 import styles from './GoogleSignInButton.module.css';
 
 /** Starts the Google OAuth flow through Supabase Auth. */
@@ -17,7 +18,8 @@ export default function GoogleSignInButton({ next = '/dashboard' }) {
 
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      // "hd" asks Google to show only UA accounts; the server still verifies the domain.
+      options: { redirectTo, queryParams: { hd: UA_EMAIL_DOMAIN } },
     });
 
     if (oauthError) {

@@ -4,9 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { requireStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { encryptStudentData } from '@/app/_lib/aes-encryption';
-import { readText, readNumber, readChoice, ValidationError } from '@/lib/validation';
-import { YEAR_LEVELS } from '@/lib/constants';
-import { toActionError } from '@/lib/actions';
+import { readText, readChoice, ValidationError } from '@/lib/validation';
+import { YEAR_LEVELS, COURSES } from '@/lib/constants';
+import { toActionError, pickFormValues } from '@/lib/actions';
+
+const FORM_FIELDS = ['fullName', 'studentNumber', 'phone', 'birthdate', 'address', 'course', 'yearLevel'];
 
 export async function updateStudentProfile(prevState, formData) {
   const { profile } = await requireStudent();
@@ -29,13 +31,12 @@ export async function updateStudentProfile(prevState, formData) {
     }
 
     const academic = {
-      course: readText(formData, 'course', { label: 'Course / Program', required: true, max: 150 }),
+      course: readChoice(formData, 'course', COURSES, { label: 'course' }),
       yearLevel: readChoice(formData, 'yearLevel', YEAR_LEVELS, { label: 'year level' }),
-      gwa: readNumber(formData, 'gwa', { label: 'GWA', min: 1, max: 100 }),
     };
 
     const supabase = await createClient();
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({
         full_name: fullName,
@@ -43,11 +44,23 @@ export async function updateStudentProfile(prevState, formData) {
         personal_data_encrypted: encryptStudentData(personal, profile.id),
         academic_data_encrypted: encryptStudentData(academic, profile.id),
       })
-      .eq('id', profile.id);
+      .eq('id', profile.id)
+      .select('id');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Profile update failed:', { code: error.code, message: error.message, details: error.details, hint: error.hint });
+      if (error.code === '42501') {
+        throw new ValidationError('The database did not allow this update (permission denied). Please contact the administrator.');
+      }
+      throw error;
+    }
+    // RLS can silently match zero rows; never report success when nothing was saved.
+    if (!data?.length) throw new ValidationError('Your profile could not be saved. Please log out and log in again.');
   } catch (error) {
-    return toActionError(error);
+    return {
+      ...toActionError(error),
+      values: pickFormValues(formData, FORM_FIELDS),
+    };
   }
 
   revalidatePath('/student', 'layout');
