@@ -1,11 +1,16 @@
 'use server';
 
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { isValidEmail, isUaEmail, safeRedirectPath } from '@/lib/validation';
+import { ConfigError } from '@/lib/supabase/admin';
+import { sendVerificationCode, verifyCode, createAccount, SETUP_TOKEN_TTL_MS } from '@/lib/verification';
+import { isValidEmail, isUaEmail, safeRedirectPath, ValidationError } from '@/lib/validation';
 import { ROLES, UA_EMAIL_DOMAIN } from '@/lib/constants';
 
 const MIN_PASSWORD_LENGTH = 8;
+// httpOnly cookie that proves THIS browser entered the correct code (holds the one-time setup token).
+const SETUP_COOKIE = 'ua_setup';
 
 /**
  * One form, several steps (state.step):
@@ -31,7 +36,7 @@ export async function loginAction(prevState, formData) {
   // "Send a new code" goes through the same authorization check as step 1.
   if (intent !== 'resend') {
     if (step === 'password') return loginWithPassword(supabase, email, formData, next);
-    if (step === 'code') return verifySetupCode(supabase, email, formData);
+    if (step === 'code') return verifySetupCode(email, formData);
     if (step === 'setPassword') return createPassword(supabase, email, formData, next);
   }
 
@@ -43,7 +48,7 @@ export async function loginAction(prevState, formData) {
   }
 
   if (status === 'existing') return { step: 'password', email };
-  if (status === 'authorized') return sendSetupCode(supabase, email);
+  if (status === 'authorized') return sendSetupCode(email);
 
   return {
     step: 'email',
@@ -79,42 +84,60 @@ async function loginWithPassword(supabase, email, formData, next) {
   redirect(next);
 }
 
-/**
- * Sends a one-time code to the student's UA email (Supabase Auth email OTP).
- * Supabase creates the auth user only if the database trigger finds the email on the
- * authorized list, and it enforces code expiry and request/verification rate limits.
- */
-async function sendSetupCode(supabase, email) {
-  const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+/** Turns setup errors into messages for the form (details stay in the server log). */
+function setupError(error, step, email) {
+  if (error instanceof ValidationError) return { step, email, error: error.message };
+  if (error instanceof ConfigError) {
+    console.error('Email verification is not configured:', error.message);
+    return {
+      step: 'email',
+      email,
+      error: 'Email verification is not set up on the server yet, so no code could be sent. Please contact the administrator.',
+    };
+  }
+  console.error('Account setup step failed:', error?.message ?? error);
+  return {
+    step: step === 'code' ? 'code' : 'email',
+    email,
+    error: 'We could not send or check the verification code right now. Please try again later.',
+  };
+}
 
-  if (error) {
-    if (error.status === 429) {
-      return { step: 'code', email, error: 'Please wait a minute before requesting another code.' };
-    }
-    console.error('Sending setup code failed:', error.message);
-    return { step: 'email', email, error: 'We could not send a verification code right now. Please try again later.' };
+/** Emails a new 6-digit code (Resend) to an authorized student. See lib/verification.js. */
+async function sendSetupCode(email) {
+  try {
+    await sendVerificationCode(email);
+  } catch (error) {
+    return setupError(error, 'code', email);
   }
 
   return {
     step: 'code',
     email,
-    success: `We sent a verification code to ${email}. Enter it below to set up your account.`,
+    success: `We sent a 6-digit verification code to ${email}. It expires in 5 minutes.`,
   };
 }
 
-async function verifySetupCode(supabase, email, formData) {
-  const token = String(formData.get('code') ?? '').replace(/\s/g, '');
-  if (!/^\d{6,10}$/.test(token)) {
-    return { step: 'code', email, error: 'Please enter the verification code from your email.' };
+async function verifySetupCode(email, formData) {
+  const code = String(formData.get('code') ?? '').replace(/\s/g, '');
+  if (!/^\d{6}$/.test(code)) {
+    return { step: 'code', email, error: 'Please enter the 6-digit code from your email.' };
   }
 
-  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
-  if (error) {
-    if (error.status === 429) {
-      return { step: 'code', email, error: 'Too many attempts. Please wait a few minutes and try again.' };
-    }
-    return { step: 'code', email, error: 'The code is incorrect or has expired. Check the code or request a new one.' };
+  let setupToken;
+  try {
+    setupToken = await verifyCode(email, code);
+  } catch (error) {
+    return setupError(error, 'code', email);
   }
+
+  (await cookies()).set(SETUP_COOKIE, setupToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/login',
+    maxAge: SETUP_TOKEN_TTL_MS / 1000,
+  });
 
   return { step: 'setPassword', email, success: 'Your email is verified. Create a password to finish setting up your account.' };
 }
@@ -133,16 +156,23 @@ async function createPassword(supabase, email, formData, next) {
     return { step: 'setPassword', email, error: 'Passwords do not match.' };
   }
 
-  // A password can only be set from the session created by a verified code.
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.email?.toLowerCase() !== email || !user.email_confirmed_at) {
-    return { step: 'email', error: 'Your verification has expired. Please start again.' };
+  // The account is created only with the setup token from a correct code (httpOnly cookie).
+  const cookieStore = await cookies();
+  try {
+    await createAccount(email, cookieStore.get(SETUP_COOKIE)?.value, password);
+  } catch (error) {
+    if (error instanceof ValidationError && error.message.startsWith('Your verification has expired')) {
+      return { step: 'email', error: error.message };
+    }
+    return setupError(error, 'setPassword', email);
   }
+  cookieStore.delete({ name: SETUP_COOKIE, path: '/login' });
 
-  const { error } = await supabase.auth.updateUser({ password });
+  // Log the student in with the new password and go to the dashboard.
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    console.error('Setting password failed:', error.message);
-    return { step: 'setPassword', email, error: 'We could not save your password. Please try a different password.' };
+    console.error('Login after account setup failed:', error.message);
+    return { step: 'password', email, success: 'Your account is ready. Please log in with your new password.' };
   }
 
   redirect(next);

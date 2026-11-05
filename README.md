@@ -26,22 +26,32 @@ Then set `AES_SECRET_KEY` in `.env.local` to a random string of at least 32 char
    `http://localhost:3000/auth/callback` to *Redirect URLs* (add your production URL too).
 
 ### 3. Email verification codes (first-time account setup)
-Students set up their account by entering a code sent to their UA email. Supabase Auth sends,
-expires and rate-limits these codes; this app does not store any email-service keys.
+Students set up their account with a 6-digit code that **this app** generates and emails through
+**Resend** (`lib/verification.js`, `lib/email.js`). Codes are stored only as HMAC hashes, expire after
+5 minutes, allow 5 wrong tries, and can be requested once per minute / 5 times per hour per email.
+The account is created (with the Supabase service key, server-only) only after a correct code.
 
-1. **Email delivery (required):** Supabase's built-in email only reaches your project's team members
-   and is limited to a few emails per hour. Set up a real provider under
-   **Authentication > Emails > SMTP Settings** (e.g. Resend, Brevo, SendGrid, or Google Workspace SMTP)
-   with its host, port, username, password and sender address.
-2. **Send a code, not only a link:** in **Authentication > Emails > Templates**, add `{{ .Token }}` to
-   both the **Confirm signup** and **Magic Link** templates, for example:
-   `Your UA Scholar verification code is {{ .Token }}. It expires in 10 minutes.`
-3. **Authentication > Providers > Email:** keep **Enable Email provider**, **Allow new users to sign up**
-   and **Confirm email** ON. Sign-ups are still restricted: the database only creates accounts
-   for emails on the authorized list. Set **Email OTP Expiration** to `600` seconds (10 minutes).
-4. **Authentication > Rate Limits:** review the limits for emails sent and for token verifications
-   (these limit repeated code requests and wrong-code attempts).
-5. **Google provider:** keep it disabled (Continue with Google was removed).
+1. **Resend account:** sign up at https://resend.com.
+2. **Verify a sending domain:** Resend > **Domains** > *Add domain*, then add the DNS records it shows
+   at your domain's DNS provider and wait until it says *Verified*. Without a verified domain Resend
+   only delivers to your own Resend account email (sender `onboarding@resend.dev`), not to students.
+3. **API key:** Resend > **API Keys** > *Create API key* (Sending access).
+4. **Supabase secret key:** Supabase > **Project Settings > API Keys** > *Secret keys* (`sb_secret_...`),
+   or the legacy `service_role` key.
+5. Put them in `.env.local` (never commit it; `.env*` files are git-ignored):
+   ```
+   SUPABASE_SECRET_KEY=sb_secret_...
+   RESEND_API_KEY=re_...
+   EMAIL_FROM="UA Scholar <noreply@your-verified-domain.com>"
+   ```
+   Restart `npm run dev` after changing env files.
+6. **Supabase > Authentication > Providers > Email > Allow new users to sign up: OFF.** Accounts are
+   only created by the server after a correct code (the server's admin API still works when this is off).
+   Keep the **Google** provider disabled.
+
+**Vercel:** Project > **Settings > Environment Variables** > add `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`,
+`EMAIL_FROM` (plus the existing variables) for *Production* (and *Preview* if used), then
+**Deployments > ... > Redeploy** (env changes only apply to new deployments).
 
 ### 4. Run
 ```bash
@@ -79,6 +89,11 @@ delete from public.authorized_emails where email = 'name.student@ua.edu.ph';
 - authorized, no account yet → a code is emailed → enter code → create password → dashboard
   (one time only; later logins use the password);
 - not authorized → "not currently authorized" message, no account is created.
+
+`account_created_at` is filled in automatically (by a database trigger) when the student creates
+their password. Until then, entering the email sends a code again, so an unfinished setup can always
+be completed. (Accounts made from a code get a random temporary password from Supabase, which is
+why "has a password" alone does not mean the setup is finished.)
 
 The list only proves that someone was authorized and can open that UA mailbox. It does not
 check current enrollment.
@@ -158,7 +173,8 @@ Names, emails, statuses and scholarship listings stay plain so they can be liste
 - Uploads are checked for size (5 MB), MIME type **and** file signature, encrypted, stored in a private bucket,
   and downloaded only through `/api/documents/[id]` after an access check.
 - Open-redirect protection on login and OAuth `next` parameters, sanitized search input, and security headers in `next.config.mjs`.
-- No Supabase service-role key is used anywhere.
+- The Supabase secret (service) key is used only on the server for first-time account setup
+  (`lib/supabase/admin.js` → `lib/verification.js`); every other query runs as the logged-in user under RLS.
 
 ## Project structure
 ```
