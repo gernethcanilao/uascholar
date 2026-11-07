@@ -7,7 +7,9 @@ import { encryptStudentData } from '@/app/_lib/aes-encryption';
 import { decryptStudentProfile } from '@/lib/profile';
 import { readText, readChoice, ValidationError } from '@/lib/validation';
 import { YEAR_LEVELS, UA_COLLEGES, coursesForCollege } from '@/lib/constants';
-import { toActionError } from '@/lib/actions';
+import { toActionError, pickFormValues } from '@/lib/actions';
+
+const FORM_FIELDS = ['firstName', 'lastName', 'studentNumber', 'phone', 'birthdate', 'address', 'college', 'course', 'yearLevel'];
 
 export async function updateStudentProfile(prevState, formData) {
   const { profile } = await requireStudent();
@@ -26,7 +28,7 @@ export async function updateStudentProfile(prevState, formData) {
     };
 
     if (!/^[0-9+\-\s()]{7,20}$/.test(personal.phone)) {
-      throw new ValidationError('Please enter a valid contact number.');
+      throw new ValidationError('Please enter a valid contact number (7 to 20 digits, e.g. 09171234567).');
     }
     if (personal.birthdate && Number.isNaN(Date.parse(personal.birthdate))) {
       throw new ValidationError('Please enter a valid birthdate.');
@@ -66,7 +68,8 @@ export async function updateStudentProfile(prevState, formData) {
 
     if (error) throw error;
   } catch (error) {
-    return toActionError(error);
+    // Send the typed values back so the form keeps them after an error.
+    return { ...toActionError(error), values: pickFormValues(formData, FORM_FIELDS) };
   }
 
   revalidatePath('/student', 'layout');
