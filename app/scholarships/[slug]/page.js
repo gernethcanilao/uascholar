@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth';
@@ -12,7 +13,7 @@ function DetailList({ title, items, ordered = false }) {
   return (
     <section className={styles.block}>
       <h2>{title}</h2>
-      <List className={styles.list}>
+      <List className={ordered ? styles.steps : styles.list}>
         {items.map((item) => <li key={item}>{item}</li>)}
       </List>
     </section>
@@ -37,29 +38,53 @@ export default async function ScholarshipDetailsPage({ params }) {
 
   let callToAction = null;
   if (!current) {
-    callToAction = <LinkButton href={`/login?next=${encodeURIComponent(eligibilityPath)}`}>Log in to apply</LinkButton>;
+    callToAction = <LinkButton href={`/login?next=${encodeURIComponent(eligibilityPath)}`} size="lg">Log in to apply</LinkButton>;
   } else if (current.profile.role === ROLES.STUDENT) {
-    callToAction = <LinkButton href={eligibilityPath}>Check eligibility &amp; apply</LinkButton>;
+    callToAction = <LinkButton href={eligibilityPath} size="lg">Check eligibility &amp; apply</LinkButton>;
   }
 
   return (
-    <div className={`container ${styles.page}`}>
-      <header className={styles.header}>
-        <span className={styles.category}>{scholarship.category}</span>
-        <h1>{scholarship.name}</h1>
-        <p className={styles.summary}>{scholarship.summary}</p>
-        {scholarship.deadline && (
-          <p className={styles.deadline}>Application deadline: <strong>{formatDate(scholarship.deadline)}</strong></p>
-        )}
-        {callToAction}
+    <>
+      <header className={styles.hero}>
+        <div className="container">
+          <Link href="/scholarships" className={styles.back}>← All scholarships</Link>
+          <span className={styles.category}>{scholarship.category}</span>
+          <h1 className={styles.title}>{scholarship.name}</h1>
+          <p className={styles.summary}>{scholarship.summary}</p>
+        </div>
       </header>
 
-      <div className={styles.grid}>
-        <DetailList title="Benefits" items={scholarship.benefits} />
-        <DetailList title="Eligibility Requirements" items={scholarship.eligibility} />
-        <DetailList title="Application Process" items={scholarship.application_process} ordered />
-        <DetailList title="Required Documents" items={scholarship.required_documents} />
+      <div className={`container ${styles.layout}`}>
+        <div className={styles.main}>
+          <DetailList title="Benefits" items={scholarship.benefits} />
+          <DetailList title="Eligibility requirements" items={scholarship.eligibility} />
+          <DetailList title="Application process" items={scholarship.application_process} ordered />
+          <DetailList title="Required documents" items={scholarship.required_documents} />
+        </div>
+
+        <aside className={styles.aside}>
+          <div className={styles.applyCard}>
+            <h2>Apply for this program</h2>
+            <dl className={styles.facts}>
+              <div>
+                <dt>Category</dt>
+                <dd>{scholarship.category}</dd>
+              </div>
+              <div>
+                <dt>Deadline</dt>
+                <dd>{scholarship.deadline ? formatDate(scholarship.deadline) : 'Open'}</dd>
+              </div>
+              {scholarship.required_documents?.length > 0 && (
+                <div>
+                  <dt>Documents</dt>
+                  <dd>{scholarship.required_documents.length} required</dd>
+                </div>
+              )}
+            </dl>
+            {callToAction && <div className={styles.applyAction}>{callToAction}</div>}
+          </div>
+        </aside>
       </div>
-    </div>
+    </>
   );
 }

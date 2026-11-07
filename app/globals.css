@@ -1,24 +1,46 @@
 /* Global design tokens and base element styles.
    Page- and component-specific styles live in their own *.module.css files. */
 :root {
+  /* Brand */
   --color-primary: #0b3d91;
-  --color-primary-dark: #082c69;
-  --color-primary-light: #e8eefb;
+  --color-primary-dark: #072a66;
+  --color-primary-darker: #051c45;
+  --color-primary-light: #eaf0fc;
+  --color-primary-soft: #d4e0f8;
   --color-accent: #f2b705;
-  --color-bg: #f4f6fb;
+  --color-accent-dark: #c99500;
+  --color-accent-light: #fff6d6;
+
+  /* Neutrals */
+  --color-bg: #f5f7fb;
   --color-surface: #ffffff;
-  --color-text: #1f2937;
-  --color-muted: #6b7280;
-  --color-border: #e5e7eb;
+  --color-surface-muted: #f8fafc;
+  --color-text: #0f172a;
+  --color-text-soft: #334155;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Status */
   --color-success: #15803d;
   --color-success-bg: #dcfce7;
   --color-danger: #b91c1c;
   --color-danger-bg: #fee2e2;
   --color-warning: #a16207;
   --color-warning-bg: #fef9c3;
-  --radius: 10px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --font: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+
+  /* Shape & depth */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --shadow: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 0 0 1px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.06), 0 12px 32px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 0 0 1px rgba(15, 23, 42, 0.05), 0 20px 50px rgba(7, 42, 102, 0.18);
+  --ring: 0 0 0 3px rgba(11, 61, 145, 0.25);
+
+  --font: var(--font-sans, 'Segoe UI'), system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --nav-height: 68px;
+  --transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -33,6 +55,11 @@ body {
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: var(--font);
   background: var(--color-bg);
@@ -41,86 +68,223 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 main {
   flex: 1;
 }
 
+::selection {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-darker);
+}
+
 a {
   color: var(--color-primary);
   text-decoration: none;
+  transition: color var(--transition);
 }
 
 a:hover {
+  color: var(--color-primary-dark);
   text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 h1,
 h2,
-h3 {
-  line-height: 1.25;
+h3,
+h4 {
+  line-height: 1.2;
   margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+h1 {
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+img,
+svg {
+  max-width: 100%;
 }
 
 .container {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.25rem;
 }
 
+@media (min-width: 768px) {
+  .container {
+    padding: 0 2rem;
+  }
+}
+
+/* ---------- Forms ---------- */
 label {
   display: block;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--color-text-soft);
+  margin-bottom: 0.4rem;
 }
 
 input,
 select,
 textarea {
   width: 100%;
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
   font: inherit;
-  background: #fff;
+  font-size: 0.95rem;
+  background: var(--color-surface);
   color: inherit;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #94a3b8;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--ring);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2364748b'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 1.1rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 6rem;
 }
 
 input[type='checkbox'],
 input[type='radio'] {
-  width: auto;
+  width: 1.05rem;
+  height: 1.05rem;
+  padding: 0;
+  accent-color: var(--color-primary);
+  box-shadow: none;
 }
 
+input[type='file'] {
+  padding: 0.5rem;
+  background: var(--color-surface-muted);
+  border-style: dashed;
+}
+
+input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.4rem 0.9rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---------- Tables ---------- */
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   background: var(--color-surface);
 }
 
 th,
 td {
   text-align: left;
-  padding: 0.75rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--color-border);
   font-size: 0.92rem;
   vertical-align: middle;
 }
 
 th {
-  background: #f9fafb;
+  background: var(--color-surface-muted);
   font-weight: 600;
   color: var(--color-muted);
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+th:first-child {
+  border-top-left-radius: var(--radius-sm);
+}
+
+th:last-child {
+  border-top-right-radius: var(--radius-sm);
+}
+
+tbody tr {
+  transition: background var(--transition);
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
 }

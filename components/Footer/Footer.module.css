@@ -1,17 +1,93 @@
 .footer {
-  margin-top: 3rem;
-  padding: 1.5rem 0;
-  background: var(--color-primary-dark);
-  color: #cbd5e1;
-  text-align: center;
+  margin-top: 5rem;
+  background: var(--color-primary-darker);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.9rem;
 }
 
-.footer p {
-  margin: 0.2rem 0;
+.inner {
+  display: grid;
+  grid-template-columns: 2fr repeat(3, 1fr);
+  gap: 2.5rem;
+  padding-top: 3.5rem;
+  padding-bottom: 2.5rem;
 }
 
-.note {
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--color-accent);
+  color: var(--color-primary-darker);
   font-size: 0.8rem;
-  opacity: 0.8;
+  font-weight: 800;
+}
+
+.tagline {
+  max-width: 300px;
+  margin: 0;
+  line-height: 1.65;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.heading {
+  margin: 0 0 0.35rem;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.col a {
+  color: rgba(255, 255, 255, 0.7);
+  width: fit-content;
+}
+
+.col a:hover {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.bottom {
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 860px) {
+  .inner {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .brandCol {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .inner {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }

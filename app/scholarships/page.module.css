@@ -1,24 +1,40 @@
-.page {
-  padding-top: 2rem;
+.hero {
+  padding: 3rem 0 4.5rem;
+  background:
+    radial-gradient(ellipse 60% 80% at 90% 0%, rgba(242, 183, 5, 0.14) 0%, transparent 60%),
+    linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-darker) 100%);
+  color: #fff;
 }
 
 .title {
-  color: var(--color-primary-dark);
+  margin-bottom: 0.4rem;
+  color: #fff;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 800;
 }
 
 .subtitle {
-  margin: 0 0 1.25rem;
-  color: var(--color-muted);
+  margin: 0;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.05rem;
+}
+
+.page {
+  margin-top: -2.25rem;
 }
 
 .count {
-  margin: 1.25rem 0 1rem;
+  margin: 1.75rem 0 1rem;
   color: var(--color-muted);
   font-size: 0.9rem;
 }
 
+.count strong {
+  color: var(--color-text);
+}
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
 }

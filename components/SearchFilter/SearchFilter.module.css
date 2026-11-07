@@ -2,32 +2,56 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-  padding: 0.75rem;
+  padding: 0.6rem;
   background: var(--color-surface);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-md);
 }
 
 .input {
   flex: 2 1 240px;
+  padding-left: 2.6rem;
+  border-color: transparent;
+  background: var(--color-surface-muted)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2394a3b8'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.45 4.39l3.08 3.08a.75.75 0 11-1.06 1.06l-3.08-3.08A7 7 0 012 9z' clip-rule='evenodd'/%3E%3C/svg%3E")
+    no-repeat 0.85rem center / 1.1rem;
 }
 
 .select {
-  flex: 1 1 160px;
+  flex: 1 1 170px;
+  border-color: transparent;
+  background-color: var(--color-surface-muted);
+}
+
+.input:hover,
+.select:hover {
+  border-color: var(--color-border-strong);
+}
+
+.input:focus,
+.select:focus {
+  background-color: var(--color-surface);
 }
 
 .button {
   flex: 0 0 auto;
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.6rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary);
   color: #fff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+  transition: background var(--transition);
 }
 
 .button:hover {
   background: var(--color-primary-dark);
+}
+
+@media (max-width: 520px) {
+  .button {
+    flex: 1 1 100%;
+  }
 }

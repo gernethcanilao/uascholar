@@ -26,27 +26,33 @@ export default async function ScholarshipsPage({ searchParams }) {
   const { data: scholarships } = await request;
 
   return (
-    <div className={`container ${styles.page}`}>
-      <h1 className={styles.title}>Find a Scholarship</h1>
-      <p className={styles.subtitle}>Search by name or filter by category.</p>
-
-      <SearchFilter query={query} category={category} />
-
-      <p className={styles.count}>
-        {scholarships?.length ?? 0} result{scholarships?.length === 1 ? '' : 's'}
-        {query && <> for &ldquo;{query}&rdquo;</>}
-        {category && <> in {category}</>}
-      </p>
-
-      {scholarships?.length ? (
-        <div className={styles.grid}>
-          {scholarships.map((scholarship) => (
-            <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
-          ))}
+    <>
+      <section className={styles.hero}>
+        <div className="container">
+          <h1 className={styles.title}>Find a scholarship</h1>
+          <p className={styles.subtitle}>Search by name or filter by category to find programs that fit you.</p>
         </div>
-      ) : (
-        <EmptyState title="No matching scholarships" message="Try a different keyword or category." />
-      )}
-    </div>
+      </section>
+
+      <div className={`container ${styles.page}`}>
+        <SearchFilter query={query} category={category} />
+
+        <p className={styles.count}>
+          <strong>{scholarships?.length ?? 0}</strong> result{scholarships?.length === 1 ? '' : 's'}
+          {query && <> for &ldquo;{query}&rdquo;</>}
+          {category && <> in {category}</>}
+        </p>
+
+        {scholarships?.length ? (
+          <div className={styles.grid}>
+            {scholarships.map((scholarship) => (
+              <ScholarshipCard key={scholarship.id} scholarship={scholarship} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState title="No matching scholarships" message="Try a different keyword or category." />
+        )}
+      </div>
+    </>
   );
 }
