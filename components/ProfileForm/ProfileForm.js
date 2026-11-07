@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, useTransition } from 'react';
 import { updateStudentProfile } from '@/app/student/profile/actions';
 import { YEAR_LEVELS, UA_COLLEGES, coursesForCollege } from '@/lib/constants';
 import SubmitButton from '@/components/SubmitButton/SubmitButton';
@@ -9,12 +9,21 @@ import styles from './ProfileForm.module.css';
 
 export default function ProfileForm({ email, firstName, lastName, personal, academic }) {
   const [state, formAction] = useActionState(updateStudentProfile, null);
+  const [saving, startSaving] = useTransition();
+
+  // Submit without React's automatic form reset, which would blank the dropdowns after saving.
+  function handleSubmit(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    startSaving(() => formAction(data));
+  }
 
   // After a failed save, keep what the student typed instead of resetting to the saved profile.
+  // (Names go after ...personal: a profile that was never saved has empty firstName/lastName there.)
   const v = state?.values ?? {
+    ...personal,
     firstName,
     lastName,
-    ...personal,
     college: academic.college,
     course: academic.course,
     yearLevel: academic.yearLevel,
@@ -41,7 +50,7 @@ export default function ProfileForm({ email, firstName, lastName, personal, acad
   }
 
   return (
-    <form action={formAction} className={styles.form}>
+    <form action={formAction} onSubmit={handleSubmit} className={styles.form}>
       <FormMessage state={state} />
 
       <fieldset className={styles.fieldset}>
@@ -119,7 +128,7 @@ export default function ProfileForm({ email, firstName, lastName, personal, acad
       <div className={styles.actions}>
         {/* Repeated next to the button so the result is visible without scrolling up. */}
         <div className={styles.actionMessage}><FormMessage state={state} /></div>
-        <SubmitButton pendingText="Saving...">Save profile</SubmitButton>
+        <SubmitButton pendingText="Saving..." pending={saving}>Save profile</SubmitButton>
       </div>
     </form>
   );
