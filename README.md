@@ -25,33 +25,11 @@ Then set `AES_SECRET_KEY` in `.env.local` to a random string of at least 32 char
 4. **Authentication > URL Configuration**: set *Site URL* to `http://localhost:3000` and add
    `http://localhost:3000/auth/callback` to *Redirect URLs* (add your production URL too).
 
-### 3. Email verification codes (first-time account setup)
-Students set up their account with a 6-digit code that **this app** generates and emails through
-**Resend** (`lib/verification.js`, `lib/email.js`). Codes are stored only as HMAC hashes, expire after
-5 minutes, allow 5 wrong tries, and can be requested once per minute / 5 times per hour per email.
-The account is created (with the Supabase service key, server-only) only after a correct code.
-
-1. **Resend account:** sign up at https://resend.com.
-2. **Verify a sending domain:** Resend > **Domains** > *Add domain*, then add the DNS records it shows
-   at your domain's DNS provider and wait until it says *Verified*. Without a verified domain Resend
-   only delivers to your own Resend account email (sender `onboarding@resend.dev`), not to students.
-3. **API key:** Resend > **API Keys** > *Create API key* (Sending access).
-4. **Supabase secret key:** Supabase > **Project Settings > API Keys** > *Secret keys* (`sb_secret_...`),
-   or the legacy `service_role` key.
-5. Put them in `.env.local` (never commit it; `.env*` files are git-ignored):
-   ```
-   SUPABASE_SECRET_KEY=sb_secret_...
-   RESEND_API_KEY=re_...
-   EMAIL_FROM="UA Scholar <noreply@your-verified-domain.com>"
-   ```
-   Restart `npm run dev` after changing env files.
-6. **Supabase > Authentication > Providers > Email > Allow new users to sign up: OFF.** Accounts are
-   only created by the server after a correct code (the server's admin API still works when this is off).
-   Keep the **Google** provider disabled.
-
-**Vercel:** Project > **Settings > Environment Variables** > add `SUPABASE_SECRET_KEY`, `RESEND_API_KEY`,
-`EMAIL_FROM` (plus the existing variables) for *Production* (and *Preview* if used), then
-**Deployments > ... > Redeploy** (env changes only apply to new deployments).
+### 3. Google sign-in
+1. In Google Cloud Console, create an **OAuth Client ID** (Web application).
+2. Add the authorized redirect URI shown in **Supabase > Authentication > Providers > Google**
+   (it looks like `https://<project>.supabase.co/auth/v1/callback`).
+3. Paste the Google Client ID and Secret into the Supabase Google provider and enable it.
 
 ### 4. Run
 ```bash
@@ -59,44 +37,11 @@ npm run dev
 ```
 
 ### 5. Create the first super admin
-There is no public registration page. Authorize your email (see below), set up your account on the
-login page, then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
+Register normally, then run this in the Supabase SQL Editor (Dashboard > SQL Editor):
 ```sql
-update public.profiles set role = 'super_admin' where email = 'you@ua.edu.ph';
+update public.profiles set role = 'super_admin' where email = 'you@example.com';
 ```
 From then on, the super admin promotes other users and assigns scholarships under **Admin > Account Management**.
-
-## Authorized student emails
-
-Only emails in the private `public.authorized_emails` table can set up an account
-(created by the `*_authorized_emails` migration, which also adds the first three students).
-The table is not reachable through the website or the Supabase API; manage it in the **SQL Editor**:
-
-```sql
--- authorize a student (lowercase @ua.edu.ph only; duplicates are rejected)
-insert into public.authorized_emails (email) values ('name.student@ua.edu.ph');
-
--- see the list
-select * from public.authorized_emails order by created_at;
-
--- remove an authorization (does not delete an account that was already set up;
--- to block an existing account, deactivate it in Admin > Account Management)
-delete from public.authorized_emails where email = 'name.student@ua.edu.ph';
-```
-
-**Login flow:** enter UA email →
-- account already set up → enter password → dashboard;
-- authorized, no account yet → a code is emailed → enter code → create password → dashboard
-  (one time only; later logins use the password);
-- not authorized → "not currently authorized" message, no account is created.
-
-`account_created_at` is filled in automatically (by a database trigger) when the student creates
-their password. Until then, entering the email sends a code again, so an unfinished setup can always
-be completed. (Accounts made from a code get a random temporary password from Supabase, which is
-why "has a password" alone does not mean the setup is finished.)
-
-The list only proves that someone was authorized and can open that UA mailbox. It does not
-check current enrollment.
 
 ## Database (Prisma)
 
@@ -173,8 +118,7 @@ Names, emails, statuses and scholarship listings stay plain so they can be liste
 - Uploads are checked for size (5 MB), MIME type **and** file signature, encrypted, stored in a private bucket,
   and downloaded only through `/api/documents/[id]` after an access check.
 - Open-redirect protection on login and OAuth `next` parameters, sanitized search input, and security headers in `next.config.mjs`.
-- The Supabase secret (service) key is used only on the server for first-time account setup
-  (`lib/supabase/admin.js` → `lib/verification.js`); every other query runs as the logged-in user under RLS.
+- No Supabase service-role key is used anywhere.
 
 ## Project structure
 ```

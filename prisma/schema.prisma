@@ -164,38 +164,6 @@ model Notification {
   @@map("notifications")
 }
 
-/// Student emails allowed to set up an account (first-time setup with an emailed code).
-/// Managed with SQL by a super admin; never readable through the app's API.
-model AuthorizedEmail {
-  email            String    @id
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  /// Set by a database trigger when the student creates their own password (setup finished).
-  accountCreatedAt DateTime? @map("account_created_at") @db.Timestamptz(6)
-
-  verificationCode VerificationCode?
-
-  @@map("authorized_emails")
-}
-
-/// Current email verification code for first-time account setup (one row per authorized email).
-/// Codes are stored only as HMAC hashes. Server-only (service key); never readable through the API.
-model VerificationCode {
-  email           String    @id
-  codeHash        String?   @map("code_hash")
-  expiresAt       DateTime? @map("expires_at") @db.Timestamptz(6)
-  attempts        Int       @default(0)
-  lastSentAt      DateTime? @map("last_sent_at") @db.Timestamptz(6)
-  sendWindowStart DateTime? @map("send_window_start") @db.Timestamptz(6)
-  sendCount       Int       @default(0) @map("send_count")
-  /// Set after a correct code; allows creating the password for a short time (one use).
-  setupTokenHash  String?   @map("setup_token_hash")
-  verifiedAt      DateTime? @map("verified_at") @db.Timestamptz(6)
-
-  authorizedEmail AuthorizedEmail @relation(fields: [email], references: [email], onDelete: Cascade, map: "verification_codes_email_fkey")
-
-  @@map("verification_codes")
-}
-
 model Announcement {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
