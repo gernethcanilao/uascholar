@@ -7,7 +7,6 @@ export default function ScholarshipCard({ scholarship }) {
   return (
     <article className={`${styles.card} ${tone}`}>
       <div className={styles.top}>
-        <span className={styles.icon} aria-hidden="true">{scholarship.name?.charAt(0) ?? 'S'}</span>
         <span className={styles.category}>{scholarship.category}</span>
       </div>
       <h3 className={styles.title}>

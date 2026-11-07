@@ -44,21 +44,8 @@
 
 .top {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.35rem;
-}
-
-.icon {
-  display: inline-grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: var(--tone-bg);
-  color: var(--tone);
-  font-weight: 800;
-  font-size: 1.1rem;
+  margin-bottom: 0.15rem;
 }
 
 .category {

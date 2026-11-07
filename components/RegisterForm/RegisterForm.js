@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { registerAction } from '@/app/register/actions';
 import SubmitButton from '@/components/SubmitButton/SubmitButton';
 import FormMessage from '@/components/FormMessage/FormMessage';
+import PasswordInput from '@/components/PasswordInput/PasswordInput';
 import styles from './RegisterForm.module.css';
 
 export default function RegisterForm() {
@@ -34,11 +35,11 @@ export default function RegisterForm() {
       <div className={styles.row}>
         <div>
           <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" autoComplete="new-password" required minLength={8} maxLength={72} />
+          <PasswordInput id="password" name="password" autoComplete="new-password" required minLength={8} maxLength={72} />
         </div>
         <div>
           <label htmlFor="confirmPassword">Confirm password</label>
-          <input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} maxLength={72} />
+          <PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" required minLength={8} maxLength={72} />
         </div>
       </div>
       <p className={styles.hint}>At least 8 characters with a letter and a number.</p>

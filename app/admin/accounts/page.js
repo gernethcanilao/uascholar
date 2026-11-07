@@ -1,6 +1,6 @@
 import { requireSuperAdmin } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { sanitizeSearch } from '@/lib/validation';
+import { sanitizeAccountSearch } from '@/lib/validation';
 import { ROLES, ROLE_LABELS } from '@/lib/constants';
 import { removeAssignment } from './actions';
 import PageHeader from '@/components/PageHeader/PageHeader';
@@ -15,7 +15,7 @@ export const metadata = { title: 'Account Management | UA Scholar Admin' };
 export default async function AccountManagementPage({ searchParams }) {
   const { profile } = await requireSuperAdmin();
   const params = await searchParams;
-  const query = sanitizeSearch(params.q);
+  const query = sanitizeAccountSearch(params.q);
   const roleFilter = Object.values(ROLES).includes(params.role) ? params.role : '';
 
   const supabase = await createClient();
@@ -25,7 +25,8 @@ export default async function AccountManagementPage({ searchParams }) {
     .select('id, full_name, email, role, is_active, created_at')
     .order('created_at', { ascending: false })
     .limit(200);
-  if (query) accountsRequest = accountsRequest.or(`full_name.ilike.%${query}%,email.ilike.%${query}%`);
+  // Values are quoted so "." and "@" in an email are treated as text, not filter syntax.
+  if (query) accountsRequest = accountsRequest.or(`full_name.ilike."%${query}%",email.ilike."%${query}%"`);
   if (roleFilter) accountsRequest = accountsRequest.eq('role', roleFilter);
 
   const [{ data: accounts }, { data: admins }, { data: scholarships }, { data: assignments }] = await Promise.all([
@@ -45,7 +46,7 @@ export default async function AccountManagementPage({ searchParams }) {
       <section className={styles.card}>
         <h2>User accounts</h2>
         <form method="get" className={styles.filters} role="search">
-          <input type="search" name="q" defaultValue={query} placeholder="Search name or email..." maxLength={60} aria-label="Search accounts" />
+          <input type="search" name="q" defaultValue={query} placeholder="Search name or email..." maxLength={100} aria-label="Search accounts" />
           <select name="role" defaultValue={roleFilter} aria-label="Filter by role">
             <option value="">All roles</option>
             {Object.values(ROLES).map((role) => <option key={role} value={role}>{ROLE_LABELS[role]}</option>)}

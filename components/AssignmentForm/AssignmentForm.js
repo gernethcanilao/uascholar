@@ -10,7 +10,7 @@ export default function AssignmentForm({ admins, scholarships }) {
   const [state, formAction] = useActionState(assignScholarship, null);
 
   if (!admins.length) {
-    return <p className={styles.note}>There are no Scholarship Admin accounts yet. Change a user&apos;s role above first.</p>;
+    return <p className={styles.note}>No Scholarship Admins available. Assign the Scholarship Admin role to a registered user first.</p>;
   }
 
   return (

@@ -4,6 +4,7 @@ import { useActionState } from 'react';
 import { loginAction } from '@/app/login/actions';
 import SubmitButton from '@/components/SubmitButton/SubmitButton';
 import FormMessage from '@/components/FormMessage/FormMessage';
+import PasswordInput from '@/components/PasswordInput/PasswordInput';
 import styles from './LoginForm.module.css';
 
 export default function LoginForm({ next }) {
@@ -21,7 +22,7 @@ export default function LoginForm({ next }) {
 
       <div>
         <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput id="password" name="password" autoComplete="current-password" required />
       </div>
 
       <SubmitButton pendingText="Logging in...">Log in</SubmitButton>

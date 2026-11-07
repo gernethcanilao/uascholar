@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { requireAdmin } from '@/lib/auth';
+import { requireAdmin, canAccessScholarship } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { isUuid } from '@/lib/validation';
 import { updateScholarship } from '../../actions';
@@ -13,7 +13,10 @@ export default async function EditScholarshipPage({ params }) {
   const { id } = await params;
   if (!isUuid(id)) notFound();
 
-  await requireAdmin();
+  const { profile } = await requireAdmin();
+  // Scholarship Admins can only edit scholarships assigned to them (saving is also blocked by RLS).
+  if (!(await canAccessScholarship(profile, id))) notFound();
+
   const supabase = await createClient();
 
   const { data: scholarship } = await supabase.from('scholarships').select('*').eq('id', id).maybeSingle();
