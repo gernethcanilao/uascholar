@@ -11,7 +11,7 @@ const sans = Plus_Jakarta_Sans({
 
 export const metadata = {
   title: 'UA Scholar | University of the Assumption Scholarships',
-  description: 'Browse and apply for scholarships and grants offered by the University of the Assumption.',
+  description: 'The scholarship portal of the University of the Assumption.',
 };
 
 export default function RootLayout({ children }) {

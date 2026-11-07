@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { getCurrentUser, dashboardPathFor } from '@/lib/auth';
 import { safeRedirectPath } from '@/lib/validation';
 import LoginForm from '@/components/LoginForm/LoginForm';
-import GoogleSignInButton from '@/components/GoogleSignInButton/GoogleSignInButton';
 import styles from './page.module.css';
 
 export const metadata = { title: 'Log in | UA Scholar' };
@@ -24,8 +23,6 @@ export default async function LoginPage({ searchParams }) {
 
         {hasAuthError && <p className={styles.error}>Sign in failed. Please try again.</p>}
 
-        <GoogleSignInButton next={next} />
-        <div className={styles.divider}><span>or</span></div>
         <LoginForm next={next} />
 
         <p className={styles.footer}>

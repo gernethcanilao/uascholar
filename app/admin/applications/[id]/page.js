@@ -66,9 +66,10 @@ export default async function AdminApplicationReviewPage({ params }) {
               <dt>Student number</dt><dd>{personal.studentNumber || '—'}</dd>
               <dt>Contact number</dt><dd>{personal.phone || '—'}</dd>
               <dt>Address</dt><dd>{personal.address || '—'}</dd>
+              <dt>College/Program</dt><dd>{academic.college || '—'}</dd>
               <dt>Course</dt><dd>{academic.course || '—'}</dd>
               <dt>Year level</dt><dd>{academic.yearLevel || '—'}</dd>
-              <dt>GWA</dt><dd>{academic.gwa ?? '—'}</dd>
+              {academic.gwa !== '' && academic.gwa != null && <><dt>GWA</dt><dd>{academic.gwa}</dd></>}
             </dl>
           </section>
 

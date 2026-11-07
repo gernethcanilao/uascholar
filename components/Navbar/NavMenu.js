@@ -32,11 +32,13 @@ export default function NavMenu({ signedIn, dashboardHref }) {
       <div id="main-menu" className={`${styles.menu} ${open ? styles.menuOpen : ''}`}>
         <div className={styles.links}>
           <Link href="/" className={linkClass('/')}>Home</Link>
-          <Link href="/scholarships" className={linkClass('/scholarships')}>Scholarships</Link>
           {signedIn && (
-            <Link href={dashboardHref} className={linkClass(dashboardHref.replace(/\/dashboard$/, ''))}>
-              Dashboard
-            </Link>
+            <>
+              <Link href="/scholarships" className={linkClass('/scholarships')}>Scholarships</Link>
+              <Link href={dashboardHref} className={linkClass(dashboardHref.replace(/\/dashboard$/, ''))}>
+                Dashboard
+              </Link>
+            </>
           )}
         </div>
 

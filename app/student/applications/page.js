@@ -5,7 +5,6 @@ import { formatDate } from '@/lib/format';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import StatusBadge from '@/components/StatusBadge/StatusBadge';
 import EmptyState from '@/components/EmptyState/EmptyState';
-import LinkButton from '@/components/LinkButton/LinkButton';
 import styles from './page.module.css';
 
 export const metadata = { title: 'My Applications | UA Scholar' };
@@ -52,9 +51,7 @@ export default async function MyApplicationsPage() {
           </table>
         </div>
       ) : (
-        <EmptyState title="You have not applied yet" message="Find a scholarship that matches you.">
-          <LinkButton href="/scholarships">Browse scholarships</LinkButton>
-        </EmptyState>
+        <EmptyState title="You have not applied yet" message="Find a scholarship that matches you." />
       )}
     </>
   );

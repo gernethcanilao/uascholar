@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import { getCurrentUser, dashboardPathFor } from '@/lib/auth';
 import styles from './Footer.module.css';
 
-export default function Footer() {
+export default async function Footer() {
+  const current = await getCurrentUser();
+
   return (
     <footer className={styles.footer}>
       <div className={`container ${styles.inner}`}>
@@ -18,13 +21,18 @@ export default function Footer() {
         <nav className={styles.col} aria-label="Explore">
           <h2 className={styles.heading}>Explore</h2>
           <Link href="/">Home</Link>
-          <Link href="/scholarships">All scholarships</Link>
         </nav>
 
         <nav className={styles.col} aria-label="Account">
           <h2 className={styles.heading}>Account</h2>
-          <Link href="/login">Log in</Link>
-          <Link href="/register">Create an account</Link>
+          {current ? (
+            <Link href={dashboardPathFor(current.profile.role)}>My dashboard</Link>
+          ) : (
+            <>
+              <Link href="/login">Log in</Link>
+              <Link href="/register">Create an account</Link>
+            </>
+          )}
         </nav>
 
         <div className={styles.col}>

@@ -1,5 +1,5 @@
 .hero {
-  padding: 3rem 0 4.5rem;
+  padding: 3rem 0 3.25rem;
   background:
     radial-gradient(ellipse 60% 80% at 90% 0%, rgba(242, 183, 5, 0.14) 0%, transparent 60%),
     linear-gradient(160deg, var(--color-primary) 0%, var(--color-primary-darker) 100%);
@@ -20,17 +20,7 @@
 }
 
 .page {
-  margin-top: -2.25rem;
-}
-
-.count {
-  margin: 1.75rem 0 1rem;
-  color: var(--color-muted);
-  font-size: 0.9rem;
-}
-
-.count strong {
-  color: var(--color-text);
+  margin-top: 2rem;
 }
 
 .grid {

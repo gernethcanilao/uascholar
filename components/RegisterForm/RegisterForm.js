@@ -15,9 +15,15 @@ export default function RegisterForm() {
     <form action={formAction} className={styles.form}>
       <FormMessage state={state} />
 
-      <div>
-        <label htmlFor="fullName">Full name</label>
-        <input id="fullName" name="fullName" autoComplete="name" required maxLength={150} />
+      <div className={styles.row}>
+        <div>
+          <label htmlFor="firstName">First Name</label>
+          <input id="firstName" name="firstName" autoComplete="given-name" placeholder="Enter your first name" required maxLength={75} />
+        </div>
+        <div>
+          <label htmlFor="lastName">Last Name</label>
+          <input id="lastName" name="lastName" autoComplete="family-name" placeholder="Enter your last name" required maxLength={75} />
+        </div>
       </div>
 
       <div>

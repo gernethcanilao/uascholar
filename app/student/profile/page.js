@@ -1,6 +1,6 @@
 import { requireStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
-import { decryptStudentProfile } from '@/lib/profile';
+import { decryptStudentProfile, resolveNames } from '@/lib/profile';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import ProfileForm from '@/components/ProfileForm/ProfileForm';
 import styles from './page.module.css';
@@ -8,7 +8,7 @@ import styles from './page.module.css';
 export const metadata = { title: 'My Profile | UA Scholar' };
 
 export default async function StudentProfilePage() {
-  const { profile } = await requireStudent();
+  const { user, profile } = await requireStudent();
   const supabase = await createClient();
 
   const { data: row } = await supabase
@@ -18,6 +18,7 @@ export default async function StudentProfilePage() {
     .single();
 
   const { personal, academic } = decryptStudentProfile(row);
+  const { firstName, lastName } = resolveNames(personal, user, row.full_name);
 
   return (
     <>
@@ -26,7 +27,8 @@ export default async function StudentProfilePage() {
         <p className={styles.secure}>🔒 Your personal and academic information is encrypted (AES-256) before it is stored.</p>
         <ProfileForm
           email={row.email}
-          fullName={row.full_name}
+          firstName={firstName}
+          lastName={lastName}
           personal={personal}
           academic={academic}
         />

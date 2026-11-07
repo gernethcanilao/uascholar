@@ -4,17 +4,21 @@ import { revalidatePath } from 'next/cache';
 import { requireStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { encryptStudentData } from '@/app/_lib/aes-encryption';
-import { readText, readNumber, readChoice, ValidationError } from '@/lib/validation';
-import { YEAR_LEVELS } from '@/lib/constants';
+import { decryptStudentProfile } from '@/lib/profile';
+import { readText, readChoice, ValidationError } from '@/lib/validation';
+import { YEAR_LEVELS, UA_COLLEGES, coursesForCollege } from '@/lib/constants';
 import { toActionError } from '@/lib/actions';
 
 export async function updateStudentProfile(prevState, formData) {
   const { profile } = await requireStudent();
 
   try {
-    const fullName = readText(formData, 'fullName', { label: 'Full name', required: true, max: 150 });
+    const firstName = readText(formData, 'firstName', { label: 'First name', required: true, max: 75 });
+    const lastName = readText(formData, 'lastName', { label: 'Last name', required: true, max: 75 });
 
     const personal = {
+      firstName,
+      lastName,
       studentNumber: readText(formData, 'studentNumber', { label: 'Student number', required: true, max: 30 }),
       phone: readText(formData, 'phone', { label: 'Contact number', required: true, max: 20 }),
       birthdate: readText(formData, 'birthdate', { label: 'Birthdate', max: 10 }),
@@ -28,17 +32,32 @@ export async function updateStudentProfile(prevState, formData) {
       throw new ValidationError('Please enter a valid birthdate.');
     }
 
-    const academic = {
-      course: readText(formData, 'course', { label: 'Course / Program', required: true, max: 150 }),
-      yearLevel: readChoice(formData, 'yearLevel', YEAR_LEVELS, { label: 'year level' }),
-      gwa: readNumber(formData, 'gwa', { label: 'GWA', min: 1, max: 100 }),
-    };
+    const college = readChoice(formData, 'college', UA_COLLEGES, { label: 'college/program' });
+    // The Course list depends on the college; colleges without approved courses yet have no course.
+    const courseOptions = coursesForCollege(college).map((course) => course.name);
+    const course = courseOptions.length ? readChoice(formData, 'course', courseOptions, { label: 'course' }) : '';
 
     const supabase = await createClient();
+
+    // Keep a GWA saved by older versions of the form (reviewers may still see it); it is no longer edited here.
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id, academic_data_encrypted')
+      .eq('id', profile.id)
+      .single();
+    const previousGwa = decryptStudentProfile(existing).academic.gwa;
+
+    const academic = {
+      college,
+      course,
+      yearLevel: readChoice(formData, 'yearLevel', YEAR_LEVELS, { label: 'year level' }),
+      ...(previousGwa !== '' && previousGwa != null ? { gwa: previousGwa } : {}),
+    };
+
     const { error } = await supabase
       .from('profiles')
       .update({
-        full_name: fullName,
+        full_name: `${firstName} ${lastName}`,
         // Sensitive data is AES-encrypted before it reaches the database.
         personal_data_encrypted: encryptStudentData(personal, profile.id),
         academic_data_encrypted: encryptStudentData(academic, profile.id),

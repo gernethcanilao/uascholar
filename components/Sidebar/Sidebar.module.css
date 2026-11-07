@@ -1,4 +1,5 @@
 .sidebar {
+  min-width: 0;
   align-self: start;
   position: sticky;
   top: calc(var(--nav-height) + 1.5rem);
