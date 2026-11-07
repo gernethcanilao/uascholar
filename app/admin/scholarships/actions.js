@@ -23,7 +23,7 @@ function readScholarshipForm(formData) {
     benefits: readLines(formData, 'benefits', { label: 'Benefits' }),
     eligibility: readLines(formData, 'eligibility', { label: 'Eligibility' }),
     application_process: readLines(formData, 'applicationProcess', { label: 'Application process' }),
-    required_documents: readLines(formData, 'requiredDocuments', { label: 'Required documents', maxItems: 10, maxLength: 100 }),
+    required_documents: readLines(formData, 'requiredDocuments', { label: 'Required documents' }),
     deadline: deadline || null,
     is_active: formData.get('isActive') === 'on',
   };
