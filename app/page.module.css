@@ -111,6 +111,47 @@
   line-height: 1.75;
 }
 
+.values {
+  margin-top: 2.5rem;
+}
+
+.valuesTitle {
+  margin-bottom: 1rem;
+  font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+  color: var(--color-primary);
+}
+
+.valuesList {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.valueCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem 1.35rem;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-top: 4px solid var(--color-accent);
+}
+
+.valueName {
+  color: var(--color-primary-darker);
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.valueMeaning {
+  color: var(--color-text-soft);
+}
+
 .purpose {
   padding: 1.75rem;
   background: var(--color-surface);
@@ -173,6 +214,10 @@
   .about {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+
+  .valuesList {
+    grid-template-columns: 1fr;
   }
 }
 

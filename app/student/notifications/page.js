@@ -1,5 +1,6 @@
 import { requireStudent } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
+import { announcementSource, ANNOUNCEMENT_COLUMNS } from '@/lib/announcements';
 import { markAllNotificationsRead } from './actions';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import NotificationList from '@/components/NotificationList/NotificationList';
@@ -21,7 +22,7 @@ export default async function NotificationsPage() {
       .limit(50),
     supabase
       .from('announcements')
-      .select('id, title, body, created_at')
+      .select(ANNOUNCEMENT_COLUMNS)
       .order('created_at', { ascending: false })
       .limit(20),
   ]);
@@ -50,7 +51,7 @@ export default async function NotificationsPage() {
         <section>
           <h2 className={styles.heading}>Announcements</h2>
           <NotificationList
-            items={(announcements ?? []).map((a) => ({ ...a, is_read: true }))}
+            items={(announcements ?? []).map((a) => ({ ...a, source: announcementSource(a), is_read: true }))}
             emptyText="No announcements yet."
           />
         </section>

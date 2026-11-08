@@ -2,6 +2,7 @@ import { requireAdmin } from '@/lib/auth';
 import { createClient } from '@/lib/supabase/server';
 import { formatDateTime } from '@/lib/format';
 import { ROLES } from '@/lib/constants';
+import { announcementSource, ANNOUNCEMENT_COLUMNS } from '@/lib/announcements';
 import { deleteAnnouncement } from './actions';
 import PageHeader from '@/components/PageHeader/PageHeader';
 import AnnouncementForm from '@/components/AnnouncementForm/AnnouncementForm';
@@ -15,10 +16,21 @@ export default async function AnnouncementsPage() {
   const { profile } = await requireAdmin();
   const supabase = await createClient();
 
-  const { data: announcements } = await supabase
-    .from('announcements')
-    .select('id, title, body, created_at, created_by')
-    .order('created_at', { ascending: false });
+  const [{ data: announcements }, { data: assignments }] = await Promise.all([
+    supabase.from('announcements').select(ANNOUNCEMENT_COLUMNS).order('created_at', { ascending: false }),
+    // Scholarships this admin may post for (the source label is "<scholarship name> Admin").
+    supabase
+      .from('admin_assignments')
+      .select('scholarship:scholarships(id, name)')
+      .eq('admin_id', profile.id),
+  ]);
+  const isSuperAdmin = profile.role === ROLES.SUPER_ADMIN;
+  const myScholarships = isSuperAdmin
+    ? []
+    : (assignments ?? [])
+        .map((row) => row.scholarship)
+        .filter(Boolean)
+        .sort((a, b) => a.name.localeCompare(b.name));
 
   const canDelete = (item) => profile.role === ROLES.SUPER_ADMIN || item.created_by === profile.id;
 
@@ -29,7 +41,7 @@ export default async function AnnouncementsPage() {
       <div className={styles.columns}>
         <section className={styles.card}>
           <h2>New announcement</h2>
-          <AnnouncementForm />
+          <AnnouncementForm isSuperAdmin={isSuperAdmin} scholarships={myScholarships} />
         </section>
 
         <section>
@@ -42,6 +54,7 @@ export default async function AnnouncementsPage() {
                     <strong>{item.title}</strong>
                     <time>{formatDateTime(item.created_at)}</time>
                   </div>
+                  <span className={styles.source}>{announcementSource(item)}</span>
                   <p>{item.body}</p>
                   {canDelete(item) && (
                     <form action={deleteAnnouncement}>

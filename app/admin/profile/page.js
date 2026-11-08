@@ -25,7 +25,6 @@ export default async function AdminProfilePage() {
 
       <div className={styles.columns}>
         <section className={styles.card}>
-          <p className={styles.secure}>🔒 Your account details are encrypted (AES-256) with the administrator key.</p>
           <AdminProfileForm email={row.email} fullName={row.full_name} details={details} />
         </section>
 

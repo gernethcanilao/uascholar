@@ -18,17 +18,17 @@ export default async function StudentProfilePage() {
     .single();
 
   const { personal, academic } = decryptStudentProfile(row);
-  const { firstName, lastName } = resolveNames(personal, user, row.full_name);
+  const { firstName, lastName, suffix } = resolveNames(personal, user, row.full_name);
 
   return (
     <>
       <PageHeader title="My Profile" description="Keep your personal and academic information up to date." />
       <div className={styles.card}>
-        <p className={styles.secure}>🔒 Your personal and academic information is encrypted (AES-256) before it is stored.</p>
         <ProfileForm
           email={row.email}
           firstName={firstName}
           lastName={lastName}
+          suffix={suffix}
           personal={personal}
           academic={academic}
         />

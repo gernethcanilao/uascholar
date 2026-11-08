@@ -3,7 +3,7 @@ import { formatDateTime } from '@/lib/format';
 import { safeRedirectPath } from '@/lib/validation';
 import styles from './NotificationList.module.css';
 
-/** items: [{ id, title, body, link?, is_read, created_at }] */
+/** items: [{ id, title, body, link?, source?, is_read, created_at }] (source: who published an announcement) */
 export default function NotificationList({ items, emptyText = 'Nothing here yet.' }) {
   if (!items.length) return <p className={styles.empty}>{emptyText}</p>;
 
@@ -15,6 +15,7 @@ export default function NotificationList({ items, emptyText = 'Nothing here yet.
             <strong>{item.title}</strong>
             <time className={styles.time}>{formatDateTime(item.created_at)}</time>
           </div>
+          {item.source && <span className={styles.source}>{item.source}</span>}
           <p className={styles.body}>{item.body}</p>
           {item.link && <Link href={safeRedirectPath(item.link, '/student/dashboard')}>View details →</Link>}
         </li>

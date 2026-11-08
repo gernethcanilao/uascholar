@@ -62,7 +62,7 @@ export default async function StudentDirectoryPage({ searchParams }) {
         <div className={styles.tableWrapper}>
           <table>
             <thead>
-              <tr><th>Name</th><th>Student no.</th><th>Course</th><th>Year</th><th>Registered</th><th>Status</th></tr>
+              <tr><th>Name</th><th>Student no.</th><th>Program</th><th>Year</th><th>Registered</th><th>Status</th></tr>
             </thead>
             <tbody>
               {students.map((student) => (

@@ -84,8 +84,9 @@ model Scholarship {
   createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime            @default(now()) @map("updated_at") @db.Timestamptz(6)
 
-  applications Application[]
-  assignments  AdminAssignment[]
+  applications  Application[]
+  assignments   AdminAssignment[]
+  announcements Announcement[]
 
   @@map("scholarships")
 }
@@ -165,13 +166,20 @@ model Notification {
 }
 
 model Announcement {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title     String
-  body      String
-  createdBy String?  @map("created_by") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String
+  body          String
+  createdBy     String?  @map("created_by") @db.Uuid
+  /// Scholarship the announcement is for (NULL for General Admin). Checked by a database trigger
+  /// against the author's assignments (see *_announcement_scholarship migration).
+  scholarshipId String?  @map("scholarship_id") @db.Uuid
+  /// Who published it, e.g. "Academic Scholarship Admin" or "General Admin". Set by the same trigger
+  /// from the author's role and the scholarship; never sent by the app.
+  sourceLabel   String?  @map("source_label")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
-  author Profile? @relation(fields: [createdBy], references: [id], onDelete: SetNull, map: "announcements_created_by_fkey")
+  author      Profile?     @relation(fields: [createdBy], references: [id], onDelete: SetNull, map: "announcements_created_by_fkey")
+  scholarship Scholarship? @relation(fields: [scholarshipId], references: [id], onDelete: SetNull, map: "announcements_scholarship_id_fkey")
 
   @@map("announcements")
 }

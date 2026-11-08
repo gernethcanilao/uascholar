@@ -1,0 +1,22 @@
+.required {
+  margin-left: 0.2rem;
+  color: var(--color-danger);
+}
+
+.optional {
+  margin-left: 0.3rem;
+  font-weight: 400;
+  color: var(--color-muted);
+}
+
+.error {
+  margin: 0.35rem 0 0;
+  color: var(--color-danger);
+  font-size: 0.82rem;
+}
+
+.legend {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.82rem;
+}

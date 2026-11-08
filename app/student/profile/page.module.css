@@ -4,12 +4,3 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
-
-.secure {
-  margin: 0 0 1.5rem;
-  padding: 0.6rem 0.9rem;
-  border-radius: 8px;
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-  font-size: 0.88rem;
-}

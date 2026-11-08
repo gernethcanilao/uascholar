@@ -2,22 +2,20 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Avatar from '@/components/Avatar/Avatar';
 import styles from './Sidebar.module.css';
 
-function initials(name = '') {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return '?';
-  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
-}
-
-/** Side navigation for the student and admin areas. links: [{ href, label }] */
-export default function Sidebar({ title, subtitle, links }) {
+/**
+ * Side navigation for the student and admin areas. links: [{ href, label }]
+ * `initials` and `role` come from the signed-in user (see the student/admin layouts).
+ */
+export default function Sidebar({ title, subtitle, links, initials, role }) {
   const pathname = usePathname();
 
   return (
     <aside className={styles.sidebar}>
       <div className={styles.header}>
-        <span className={styles.avatar} aria-hidden="true">{initials(title)}</span>
+        <Avatar initials={initials} role={role} />
         <div className={styles.identity}>
           <strong className={styles.title}>{title}</strong>
           {subtitle && <span className={styles.subtitle}>{subtitle}</span>}

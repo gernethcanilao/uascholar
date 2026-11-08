@@ -32,6 +32,17 @@
   font-size: 0.8rem;
 }
 
+.source {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .body {
   margin: 0.35rem 0;
   white-space: pre-wrap;

@@ -7,7 +7,7 @@
 
 .inner {
   display: grid;
-  grid-template-columns: 2fr repeat(3, 1fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   gap: 2.5rem;
   padding-top: 3.5rem;
   padding-bottom: 2.5rem;
@@ -52,16 +52,6 @@
   letter-spacing: 0.08em;
 }
 
-.col a {
-  color: rgba(255, 255, 255, 0.7);
-  width: fit-content;
-}
-
-.col a:hover {
-  color: var(--color-accent);
-  text-decoration: none;
-}
-
 .bottom {
   padding-top: 1.25rem;
   padding-bottom: 1.5rem;
@@ -70,17 +60,7 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-@media (max-width: 860px) {
-  .inner {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .brandCol {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .inner {
     grid-template-columns: 1fr;
     gap: 2rem;

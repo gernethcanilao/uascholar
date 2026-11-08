@@ -8,6 +8,13 @@ const PURPOSE = [
   { title: 'Apply for financial assistance', text: 'Submit your application online and follow its status until a decision is made.' },
 ];
 
+// Listed exactly as supplied by the university (the MAGANACA entry appears twice on purpose).
+const CORE_VALUES = [
+  { name: 'BIASA', meaning: 'Academic Competence (Scientia)' },
+  { name: 'MAGANACA', meaning: 'Moral Uprightness (Virtus)' },
+  { name: 'MAGANACA', meaning: 'Moral Uprightness (Virtus)' },
+];
+
 export default async function HomePage() {
   const current = await getCurrentUser();
 
@@ -40,12 +47,12 @@ export default async function HomePage() {
       <section className={`container ${styles.section}`} aria-labelledby="about-title">
         <div className={styles.about}>
           <div className={styles.aboutText}>
-            <span className={styles.kicker}>About the university</span>
-            <h2 id="about-title" className={styles.sectionTitle}>University of the Assumption</h2>
+            <span className={styles.kicker}>University of the Assumption</span>
+            <h2 id="about-title" className={styles.sectionTitle}>About the University</h2>
             <p>
-              Founded in 1963 in the City of San Fernando, Pampanga, the University of the Assumption is the first
-              archdiocesan Catholic university in Asia. It is committed to forming competent, compassionate and
-              Christ-centered graduates who serve their communities.
+              The University of the Assumption, an Archdiocesan Catholic Educational Institution, envisions itself
+              as the leading formator of academically competent, morally upright, and socially responsible
+              Catholic leaders.
             </p>
           </div>
 
@@ -63,6 +70,18 @@ export default async function HomePage() {
               <p className={styles.purposeNote}>Log in or create an account to view the available scholarships.</p>
             )}
           </div>
+        </div>
+
+        <div className={styles.values}>
+          <h3 id="values-title" className={styles.valuesTitle}>Core Values</h3>
+          <ul className={styles.valuesList}>
+            {CORE_VALUES.map((value, index) => (
+              <li key={index} className={styles.valueCard}>
+                <strong className={styles.valueName}>{value.name}</strong>
+                <span className={styles.valueMeaning}>{value.meaning}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </>

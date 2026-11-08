@@ -10,6 +10,10 @@
   gap: 0.75rem;
 }
 
+.suffix {
+  max-width: calc(50% - 0.375rem);
+}
+
 .hint {
   margin: -0.5rem 0 0;
   color: var(--color-muted);
@@ -23,5 +27,9 @@
 @media (max-width: 480px) {
   .row {
     grid-template-columns: 1fr;
+  }
+
+  .suffix {
+    max-width: none;
   }
 }

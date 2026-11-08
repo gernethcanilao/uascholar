@@ -160,6 +160,13 @@ textarea {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
+/* Field with a validation error (see components/FormField) */
+input[aria-invalid='true'],
+select[aria-invalid='true'],
+textarea[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
 input::placeholder,
 textarea::placeholder {
   color: #94a3b8;
