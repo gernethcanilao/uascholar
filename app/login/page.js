@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { getCurrentUser, dashboardPathFor } from '@/lib/auth';
 import { safeRedirectPath } from '@/lib/validation';
@@ -18,6 +19,7 @@ export default async function LoginPage({ searchParams }) {
   return (
     <div className={styles.page}>
       <div className={styles.card}>
+        <Image src="/ua-logo.png" alt="University of the Assumption seal" width={72} height={72} className={styles.logo} priority />
         <h1 className={styles.title}>Welcome back</h1>
         <p className={styles.subtitle}>Log in to apply for scholarships and track your applications.</p>
 

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getCurrentUser, dashboardPathFor } from '@/lib/auth';
 import styles from './Footer.module.css';
 
@@ -10,7 +11,7 @@ export default async function Footer() {
       <div className={`container ${styles.inner}`}>
         <div className={styles.brandCol}>
           <div className={styles.brand}>
-            <span className={styles.logo} aria-hidden="true">UA</span>
+            <Image src="/ua-logo.png" alt="" width={40} height={40} className={styles.logo} />
             <span>UA Scholar</span>
           </div>
           <p className={styles.tagline}>

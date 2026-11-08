@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getCurrentUser, dashboardPathFor } from '@/lib/auth';
 import NavMenu from './NavMenu';
 import styles from './Navbar.module.css';
@@ -11,7 +12,7 @@ export default async function Navbar() {
     <header className={styles.header}>
       <nav className={`container ${styles.nav}`} aria-label="Main">
         <Link href="/" className={styles.brand}>
-          <span className={styles.logo} aria-hidden="true">UA</span>
+          <Image src="/ua-logo.png" alt="" width={44} height={44} className={styles.logo} priority />
           <span className={styles.brandText}>
             <span className={styles.brandName}>UA Scholar</span>
             <span className={styles.brandTag}>University of the Assumption</span>

@@ -12,6 +12,7 @@ const sans = Plus_Jakarta_Sans({
 export const metadata = {
   title: 'UA Scholar | University of the Assumption Scholarships',
   description: 'The scholarship portal of the University of the Assumption.',
+  icons: { icon: '/ua-logo.png', apple: '/ua-logo.png' },
 };
 
 export default function RootLayout({ children }) {
