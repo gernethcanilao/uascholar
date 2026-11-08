@@ -82,11 +82,11 @@
   margin-top: 4rem;
 }
 
+/* About the University, then "What UA Scholar helps you do" directly below it */
 .about {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 2.5rem;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
 }
 
 .kicker {
@@ -211,11 +211,6 @@
 }
 
 @media (max-width: 860px) {
-  .about {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
   .valuesList {
     grid-template-columns: 1fr;
   }
