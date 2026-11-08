@@ -23,7 +23,7 @@ export default async function ScholarshipsPage() {
     <>
       <section className={styles.hero}>
         <div className="container">
-          <h1 className={styles.title}>Browse scholarships</h1>
+          <h1 className={styles.title}>Browse Scholarships</h1>
           <p className={styles.subtitle}>View the scholarships and grants currently open at the University of the Assumption.</p>
         </div>
       </section>
