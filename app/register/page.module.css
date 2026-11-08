@@ -29,18 +29,12 @@
   box-shadow: var(--shadow-lg);
 }
 
-.card::before {
-  content: 'UA';
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
+.logo {
+  display: block;
+  width: 72px;
+  height: 72px;
   margin-bottom: 1.5rem;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #ffd34d 0%, var(--color-accent) 60%, var(--color-accent-dark) 100%);
-  color: var(--color-primary-darker);
-  font-weight: 800;
-  box-shadow: 0 6px 16px rgba(242, 183, 5, 0.35);
+  object-fit: contain;
 }
 
 .title {
